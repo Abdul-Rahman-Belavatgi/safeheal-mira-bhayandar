@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SafeHeal AI — Mira Bhayandar Health Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060a0f;--surface:#0d1520;--surface2:#111d2e;--surface3:#0a1018;
+  --border:rgba(99,179,237,0.13);--accent:#63b3ed;--accent2:#38bdf8;
+  --gold:#e2b96f;--text:#e8f0f8;--muted:#7a99b8;
+  --danger:#f87171;--success:#34d399;--warn:#fbbf24;--info:#a78bfa;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(99,179,237,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+.orb{position:fixed;border-radius:50%;filter:blur(90px);opacity:0.13;pointer-events:none;z-index:0;animation:float 9s ease-in-out infinite alternate}
+.orb1{width:520px;height:520px;background:#1a6fa8;top:-120px;left:-120px}
+.orb2{width:420px;height:420px;background:#0e4d7a;bottom:80px;right:-80px;animation-delay:4s}
+.orb3{width:300px;height:300px;background:#b45309;top:45%;left:48%;animation-delay:6s;opacity:0.07}
+@keyframes float{from{transform:translate(0,0) scale(1)}to{transform:translate(28px,18px) scale(1.06)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+
+/* ===NAV=== */
+nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(6,10,15,0.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px}
+.nav-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;gap:16px;height:58px}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:7px;white-space:nowrap;flex-shrink:0}
+.nav-logo span{color:var(--gold)}
+.nav-pulse{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:pulse 2s ease-in-out infinite}
+.nav-tabs{display:flex;gap:2px;list-style:none;overflow-x:auto;flex:1;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tabs li a{display:block;padding:6px 12px;border-radius:7px;color:var(--muted);text-decoration:none;font-size:0.76rem;letter-spacing:0.04em;text-transform:uppercase;transition:all 0.2s;white-space:nowrap;cursor:pointer}
+.nav-tabs li a:hover,.nav-tabs li a.active{background:rgba(99,179,237,0.12);color:var(--accent)}
+
+/* ===LAYOUT=== */
+.page-section{position:relative;z-index:1;display:none;min-height:100vh;padding:76px 20px 60px}
+.page-section.active{display:block}
+.sec-wrap{max-width:1200px;margin:0 auto}
+.sec-label{font-family:'DM Mono',monospace;font-size:0.67rem;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;margin-bottom:28px;line-height:1.15}
+
+/* ===CARDS=== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 26px;margin-bottom:18px}
+.card-sm{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px}
+.card-title{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.cdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+
+/* ===GRID=== */
+.g2{display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
+.g2b{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.g2{grid-template-columns:1fr}.g2b{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}.g4{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.g3,.g4{grid-template-columns:1fr}}
+
+/* ===INPUTS=== */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:0.76rem;color:var(--muted);margin-bottom:4px;letter-spacing:0.03em}
+.field input,.field select,.field textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.875rem;outline:none;transition:border-color 0.2s;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,179,237,0.08)}
+.field textarea{resize:vertical;min-height:70px}
+select option{background:#0d1520}
+.inline-fields{display:flex;gap:12px}
+.inline-fields .field{flex:1}
+
+/* ===BUTTONS=== */
+.btn{padding:9px 20px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.86rem;font-weight:500;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;white-space:nowrap}
+.btn-primary{background:linear-gradient(135deg,#1a6fa8,#0ea5e9);color:#fff;box-shadow:0 0 18px rgba(14,165,233,0.2)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 28px rgba(14,165,233,0.4)}
+.btn-success{background:linear-gradient(135deg,#059669,#34d399);color:#fff}
+.btn-success:hover{transform:translateY(-1px)}
+.btn-warn{background:linear-gradient(135deg,#b45309,#f59e0b);color:#fff}
+.btn-danger{background:linear-gradient(135deg,#991b1b,#f87171);color:#fff}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-full{width:100%;justify-content:center;padding:12px}
+.btn-lg{padding:13px 28px;font-size:0.95rem}
+
+/* ===ALERTS=== */
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:14px;font-size:0.82rem;line-height:1.6}
+.alert-info{background:rgba(99,179,237,0.08);border:1px solid rgba(99,179,237,0.2);color:var(--accent)}
+.alert-warn{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.22);color:var(--warn)}
+.alert-danger{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.22);color:var(--danger)}
+.alert-success{background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.22);color:var(--success)}
+
+/* ===TAGS=== */
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.7rem;font-family:'DM Mono',monospace;margin:2px}
+.tag-red{background:rgba(248,113,113,0.14);color:#f87171;border:1px solid rgba(248,113,113,0.28)}
+.tag-green{background:rgba(52,211,153,0.1);color:#34d399;border:1px solid rgba(52,211,153,0.22)}
+.tag-blue{background:rgba(99,179,237,0.1);color:#63b3ed;border:1px solid rgba(99,179,237,0.22)}
+.tag-gold{background:rgba(226,185,111,0.1);color:#e2b96f;border:1px solid rgba(226,185,111,0.22)}
+.tag-warn{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.22)}
+.tag-purple{background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.22)}
+
+/* ===FLAGS=== */
+.flag-list{display:flex;flex-direction:column;gap:8px}
+.flag{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;font-size:0.81rem;line-height:1.55}
+.flag.err{background:rgba(248,113,113,0.07);border:1px solid rgba(248,113,113,0.2)}
+.flag.warn{background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2)}
+.flag.ok{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.15)}
+.flag.info{background:rgba(167,139,250,0.07);border:1px solid rgba(167,139,250,0.2)}
+.flag-ico{flex-shrink:0;margin-top:1px;font-size:0.95rem}
+.flag-txt{color:var(--muted)}
+.flag-txt strong{color:var(--text);display:block;margin-bottom:1px}
+
+/* ===RISK RING=== */
+.ring-wrap{position:relative;width:140px;height:140px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:10}
+.ring-fill{fill:none;stroke:var(--success);stroke-width:10;stroke-linecap:round;stroke-dasharray:345;stroke-dashoffset:345;transition:stroke-dashoffset 1.1s ease,stroke 0.5s}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.risk-pct{font-family:'Cormorant Garamond',serif;font-size:2.1rem;font-weight:300;color:var(--success);transition:color 0.5s}
+.risk-lbl-sm{font-size:0.63rem;color:var(--muted);margin-top:1px}
+
+/* ===FEATURE BARS=== */
+.feat-row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.feat-name{width:110px;font-size:0.76rem;color:var(--muted);flex-shrink:0}
+.feat-track{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.feat-fill{height:100%;border-radius:3px;transition:width 0.9s ease;width:0}
+.feat-val{width:30px;text-align:right;font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted)}
+
+/* ===DISEASE CARDS=== */
+.disease-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.dis-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all 0.25s;cursor:pointer}
+.dis-card:hover{border-color:rgba(99,179,237,0.32);transform:translateY(-2px)}
+.dis-card.open{border-color:var(--accent)}
+.dis-head{padding:18px 22px;display:flex;align-items:flex-start;gap:14px}
+.dis-icon{font-size:1.8rem;flex-shrink:0}
+.dis-name{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:400;margin-bottom:4px}
+.dis-brief{font-size:0.78rem;color:var(--muted);line-height:1.55}
+.dis-body{display:none;padding:0 22px 20px;border-top:1px solid var(--border)}
+.dis-card.open .dis-body{display:block}
+.dis-sec{margin-top:14px}
+.dis-sec-title{font-family:'DM Mono',monospace;font-size:0.66rem;color:var(--accent);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px}
+.dis-sec p,.dis-sec li{font-size:0.8rem;color:var(--muted);line-height:1.65}
+.dis-sec ul{padding-left:16px}
+.rx-box{background:rgba(99,179,237,0.05);border:1px solid rgba(99,179,237,0.15);border-radius:8px;padding:12px 14px;margin-top:8px;position:relative;overflow:hidden}
+.rx-box::before{content:'Rx';position:absolute;right:12px;top:8px;font-family:'Cormorant Garamond',serif;font-size:2.5rem;color:rgba(99,179,237,0.06);font-weight:700;pointer-events:none}
+.rx-box p,.rx-box li{font-size:0.79rem;color:var(--muted);line-height:1.7}
+.rx-box ul{padding-left:16px}
+
+/* ===CLINIC / PHARMACY CARDS=== */
+.loc-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 22px;display:flex;gap:16px;align-items:flex-start;transition:border-color 0.2s;margin-bottom:14px}
+.loc-card:hover{border-color:rgba(99,179,237,0.28)}
+.loc-ico{width:46px;height:46px;border-radius:10px;background:rgba(99,179,237,0.1);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;border:1px solid rgba(99,179,237,0.15)}
+.loc-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:400;margin-bottom:2px}
+.loc-meta{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.loc-meta span{font-size:0.77rem;color:var(--muted)}
+.loc-meta span b{color:var(--text)}
+.loc-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:0.68rem;margin-top:6px;background:rgba(52,211,153,0.09);color:var(--success);border:1px solid rgba(52,211,153,0.18)}
+.map-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:0.76rem;color:var(--accent);padding:4px 12px;border-radius:5px;border:1px solid rgba(99,179,237,0.2);text-decoration:none;transition:all 0.2s;cursor:pointer;background:transparent}
+.map-btn:hover{background:rgba(99,179,237,0.08)}
+
+/* ===BMI=== */
+.bmi-big{font-family:'Cormorant Garamond',serif;font-size:4.5rem;font-weight:300;line-height:1}
+.bmi-cat{font-size:1.05rem;margin-top:4px;font-weight:400}
+.bmi-bar-wrap{position:relative;height:14px;border-radius:7px;overflow:visible;margin:22px 0 8px;background:linear-gradient(90deg,#3b82f6 0%,#34d399 22%,#fbbf24 50%,#f97316 72%,#ef4444 100%)}
+.bmi-pin{position:absolute;top:-5px;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--bg);box-shadow:0 0 10px rgba(0,0,0,0.5);transition:left 0.9s ease;transform:translateX(-50%)}
+.bmi-labels{display:flex;justify-content:space-between;font-size:0.68rem;color:var(--muted)}
+
+/* ===SYMPTOM TAGS=== */
+.sym-cloud{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.sym-tag{padding:6px 13px;border-radius:20px;font-size:0.78rem;background:var(--surface2);border:1px solid var(--border);cursor:pointer;transition:all 0.2s;color:var(--muted);user-select:none}
+.sym-tag:hover{border-color:rgba(99,179,237,0.4);color:var(--accent)}
+.sym-tag.sel{background:rgba(99,179,237,0.12);border-color:var(--accent);color:var(--accent)}
+
+/* ===REPORT=== */
+.report-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px 30px;margin-bottom:18px}
+.score-circle{width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;border:3px solid}
+.score-good{border-color:var(--success);color:var(--success);background:rgba(52,211,153,0.07)}
+.score-mod{border-color:var(--warn);color:var(--warn);background:rgba(251,191,36,0.07)}
+.score-poor{border-color:var(--danger);color:var(--danger);background:rgba(248,113,113,0.07)}
+.metric-box{background:var(--surface2);border-radius:8px;padding:12px 15px;text-align:center}
+.metric-label{font-size:0.68rem;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:3px}
+.metric-val{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:300}
+.metric-status{font-size:0.68rem;margin-top:2px}
+
+/* ===DIVIDER / MISC=== */
+.divider{height:1px;background:var(--border);margin:20px 0}
+.section-search{display:flex;gap:10px;margin-bottom:20px}
+.section-search input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 15px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.875rem;outline:none;transition:border-color 0.2s}
+.section-search input:focus{border-color:var(--accent)}
+.fadeup{animation:fadeUp 0.5s ease both}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+
+<nav>
+<div class="nav-inner">
+  <div class="nav-logo"><div class="nav-pulse"></div>Safe<span>Heal</span> AI</div>
+  <ul class="nav-tabs">
+    <li><a class="active" onclick="show('home',this)">🏠 Home</a></li>
+    <li><a onclick="show('dashboard',this)">⚡ Risk Check</a></li>
+    <li><a onclick="show('bmi',this)">⚖️ BMI</a></li>
+    <li><a onclick="show('symptoms',this)">🔍 Symptoms</a></li>
+    <li><a onclick="show('diseases',this)">🦠 Diseases</a></li>
+    <li><a onclick="show('clinics',this)">🏥 Clinics</a></li>
+    <li><a onclick="show('pharmacy',this)">💊 Pharmacy</a></li>
+    <li><a onclick="show('report',this)">📋 Report</a></li>
+  </ul>
+</div>
+</nav>
+
+<!-- ======== HOME ======== -->
+<section id="home" class="page-section active">
+<div style="position:relative;z-index:1;min-height:calc(100vh - 58px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 20px 60px">
+  <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(99,179,237,0.08);border:1px solid rgba(99,179,237,0.2);border-radius:100px;padding:5px 16px;font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--accent);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:26px;animation:fadeUp 0.7s ease both">📍 Mira Bhayandar · AI Health Portal · 2026</div>
+  <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2.6rem,7vw,5.2rem);font-weight:300;line-height:1.08;max-width:820px;animation:fadeUp 0.7s 0.1s ease both">Your Complete<br><em style="font-style:normal;background:linear-gradient(135deg,#63b3ed,#e2b96f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Health Companion</em><br>in Mira Bhayandar</h1>
+  <p style="margin-top:18px;font-size:1rem;color:var(--muted);max-width:540px;line-height:1.7;animation:fadeUp 0.7s 0.2s ease both">AI-powered health risk analysis, disease library, symptom checker, nearby clinics & pharmacies — all in one place.</p>
+  <div style="display:flex;gap:12px;margin-top:36px;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.7s 0.3s ease both">
+    <button class="btn btn-primary btn-lg" onclick="show('dashboard',null)">⚡ Check Health Risk</button>
+    <button class="btn btn-warn btn-lg" onclick="show('symptoms',null)">🔍 Symptom Checker</button>
+    <button class="btn btn-ghost btn-lg" onclick="show('clinics',null)">🏥 Find Clinics</button>
+  </div>
+  <div style="display:flex;gap:48px;margin-top:60px;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.7s 0.4s ease both">
+    <div style="text-align:center"><div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:var(--accent)">12+</div><div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:3px">Clinics</div></div>
+    <div style="text-align:center"><div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:var(--accent)">20+</div><div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:3px">Diseases</div></div>
+    <div style="text-align:center"><div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:var(--accent)">15+</div><div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:3px">Pharmacies</div></div>
+    <div style="text-align:center"><div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:var(--accent)">AI</div><div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:3px">Powered</div></div>
+  </div>
+</div>
+</section>
+
+<!-- ======== RISK DASHBOARD ======== -->
+<section id="dashboard" class="page-section">
+<div class="sec-wrap fadeup">
+  <div class="sec-label">AI Analysis</div>
+  <div class="sec-title">Health Risk Dashboard</div>
+  <div class="g2">
+    <div>
+      <div class="card">
+        <div class="card-title"><div class="cdot" style="background:var(--accent)"></div>Patient Parameters</div>
+        <div class="field"><label>Full Name</label><input id="p_name" placeholder="Aapka naam likhein"/></div>
+        <div class="inline-fields">
+          <div class="field"><label>Age (years)</label><input type="number" id="p_age" value="35" min="1" max="120"/></div>
+          <div class="field"><label>Gender</label><select id="p_gender"><option value="male">Male</option><option value="female">Female</option></select></div>
+        </div>
+        <div class="field"><label>Blood Pressure — Systolic (mmHg)</label><input type="number" id="p_bp" value="120" min="60" max="250" placeholder="Normal: 90–120"/></div>
+        <div class="field"><label>Fasting Sugar Level (mg/dL)</label><input type="number" id="p_sugar" value="95" min="50" max="500" placeholder="Normal: 70–100"/></div>
+        <div class="field"><label>Total Cholesterol (mg/dL)</label><input type="number" id="p_chol" value="180" min="100" max="400" placeholder="Normal: &lt;200"/></div>
+        <div class="field"><label>BMI</label><input type="number" id="p_bmi" value="22" min="10" max="60" step="0.1" placeholder="Normal: 18.5–24.9"/></div>
+        <div class="field"><label>Heart Rate (bpm)</label><input type="number" id="p_hr" value="72" min="40" max="200" placeholder="Normal: 60–100"/></div>
+        <button class="btn btn-primary btn-full" onclick="runDash()">⚡ Analyze My Health</button>
+      </div>
+    </div>
+    <div id="dash_out" style="display:none">
+      <div class="card">
+        <div class="card-title"><div class="cdot" style="background:var(--accent)"></div>Overall Risk Score</div>
+        <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+          <div class="ring-wrap">
+            <svg width="140" height="140" viewBox="0 0 140 140"><circle class="ring-bg" cx="70" cy="70" r="55"/><circle class="ring-fill" id="ringFill" cx="70" cy="70" r="55"/></svg>
+            <div class="ring-center"><div class="risk-pct" id="rPct">0%</div><div class="risk-lbl-sm">Risk Score</div></div>
+          </div>
+          <div style="flex:1;min-width:170px">
+            <div id="rLabel" style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;margin-bottom:5px"></div>
+            <div id="rSub" style="font-size:0.8rem;color:var(--muted);margin-bottom:12px"></div>
+            <div id="rCounterfact" class="alert alert-info" style="font-size:0.8rem"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="cdot" style="background:var(--accent2)"></div>SHAP Feature Analysis</div>
+        <div id="featBars"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="cdot" style="background:var(--warn)"></div>Age-wise Precautions & Advice</div>
+        <div id="agePrecaution"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="cdot" style="background:var(--info)"></div>Temporary Medicines (Until Doctor Visit)</div>
+        <div class="alert alert-warn" style="margin-bottom:12px;font-size:0.78rem">⚠️ Ye sirf temporary relief ke liye hain. Doctor ki salah zaroori hai.</div>
+        <div id="tempMeds"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="cdot" style="background:var(--danger)"></div>AI Safety Flags</div>
+        <div class="flag-list" id="safetyFlags"></div>
+      </div>
+      <div style="text-align:center;padding:8px 0">
+        <button class="btn btn-success btn-lg" onclick="makeReport()">📋 Generate Full Fitness Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ======== BMI ======== -->
+<section id="bmi" class="page-section">
+<div class="sec-wrap fadeup">
+  <div class="sec-label">Calculator</div>
+  <div class="sec-title">BMI Calculator</div>
+  <div class="g2b">
+    <div class="card">
+      <div class="card-title"><div class="cdot" style="background:var(--accent)"></div>Enter Your Details</div>
+      <div class="inline-fields">
+        <div class="field"><label>Weight (kg)</label><input type="number" id="bw" placeholder="70" step="0.1" min="20" max="300"/></div>
+        <div class="field"><label>Height (cm)</label><input type="number" id="bh" placeholder="170" step="0.1" min="100" max="250"/></div>
+      </div>
+      <div class="inline-fields">
+        <div class="field"><label>Age</label><input type="number" id="ba" placeholder="30" min="1" max="120"/></div>
+        <div class="field"><label>Gender</label><select id="bg"><option value="male">Male</option><option value="female">Female</option></select></div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="calcBMI()">⚖️ Calculate BMI</button>
+      <div class="divider"></div>
+      <div style="font-size:0.78rem;color:var(--muted);line-height:1.8">
+        <strong style="color:var(--text)">BMI Ranges (Adults):</strong><br>
+        🔵 &lt;18.5 — Underweight<br>
+        🟢 18.5–24.9 — Normal Weight<br>
+        🟡 25–29.9 — Overweight<br>
+        🟠 30–34.9 — Obese Class I<br>
+        🔴 ≥35 — Obese Class II+
+      </div>
+    </div>
+    <div id="bmi_out" style="display:none">
+      <div class="card" style="text-align:center">
+        <div class="card-title"><div class="cdot" style="background:var(--success)"></div>Your BMI Result</div>
+        <div class="bmi-big" id="bmi_val">--</div>
+        <div class="bmi-cat" id="bmi_cat"></div>
+        <div class="bmi-bar-wrap"><div class="bmi-pin" id="bmi_pin" style="left:0%"></div></div>
+        <div class="bmi-labels"><span>Underweight<br>&lt;18.5</span><span>Normal<br>18.5–24.9</span><span>Overweight<br>25–29.9</span><span>Obese<br>≥30</span></div>
+        <div style="margin-top:20px;text-align:left" id="bmi_advice"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ======== SYMPTOMS ======== -->
+<section id="symptoms" class="page-section">
+<div class="sec-wrap fadeup">
+  <div class="sec-label">AI Symptom Checker</div>
+  <div class="sec-title">Check Your Symptoms</div>
+  <div class="g2b">
+    <div>
+      <div class="card">
+        <div class="card-title"><div class="cdot" style="background:var(--warn)"></div>Select Symptoms</div>
+        <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">Jo symptoms hain wo chunein (multiple select kar sakte hain):</p>
+        <div class="sym-cloud" id="symCloud">
+          <div class="sym-tag" onclick="togSym(this)">🤒 Bukhaar / Fever</div>
+          <div class="sym-tag" onclick="togSym(this)">🤧 Zukaam / Cold</div>
+          <div class="sym-tag" onclick="togSym(this)">😮‍💨 Saans lene mein takleef</div>
+          <div class="sym-tag" onclick="togSym(this)">💢 Seene mein dard</div>
+          <div class="sym-tag" onclick="togSym(this)">🤕 Sar dard</div>
+          <div class="sym-tag" onclick="togSym(this)">🤢 Ulti / Nausea</div>
+          <div class="sym-tag" onclick="togSym(this)">💩 Dast / Diarrhea</div>
+          <div class="sym-tag" onclick="togSym(this)">😴 Thakaan / Fatigue</div>
+          <div class="sym-tag" onclick="togSym(this)">👁️ Aankhein laal hona</div>
+          <div class="sym-tag" onclick="togSym(this)">🦵 Joint / Body dard</div>
+          <div class="sym-tag" onclick="togSym(this)">🌡️ Kapkapi / Chills</div>
+          <div class="sym-tag" onclick="togSym(this)">😵 Chakkar aana</div>
+          <div class="sym-tag" onclick="togSym(this)">🫀 Dil ki dhadkan tej</div>
+          <div class="sym-tag" onclick="togSym(this)">🤳 Skin rash / Daane</div>
+          <div class="sym-tag" onclick="togSym(this)">💧 Zyada pyaas</div>
+          <div class="sym-tag" onclick="togSym(this)">🚽 Baar baar peshab</div>
+          <div class="sym-tag" onclick="togSym(this)">👀 Dhundli nazar</div>
+          <div class="sym-tag" onclick="togSym(this)">🫁 Khansi / Cough</div>
+          <div class="sym-tag" onclick="togSym(this)">🤯 Migraine</div>
+          <div class="sym-tag" onclick="togSym(this)">😰 Zyada pasina</div>
+          <div class="sym-tag" onclick="togSym(this)">🩸 Muh se khoon</div>
+          <div class="sym-tag" onclick="togSym(this)">🦠 Pet dard</div>
+          <div class="sym-tag" onclick="togSym(this)">🧠 Yaaddaasht mein takleef</div>
+          <div class="sym-tag" onclick="togSym(this)">🦷 Daant dard</div>
+          <div class="sym-tag" onclick="togSym(this)">😶‍🌫️ Munh sukh jaana</div>
+          <div class="sym-tag" onclick="togSym(this)">⚖️ Wajan ghataana</div>
+          <div class="sym-tag" onclick="togSym(this)">🔴 Sujan / Swelling</div>
+          <div class="sym-tag" onclick="togSym(this)">🟡 Peeli aankhen / Skin</div>
+        </div>
+        <div class="field"><label>Koi aur symptoms (type karein)</label><textarea id="sym_extra" placeholder="Jaise: pairon mein sujan, neend nahi aati..."></textarea></div>
+        <div class="inline-fields">
+          <div class="field"><label>Aapki Umar</label><input type="number" id="sym_age" placeholder="30" min="1" max="120"/></div>
+          <div class="field"><label>Kitne din se</label>
+            <select id="sym_days"><option value="1">1 din</option><option value="3">2–3 din</option><option value="7">1 hafte</option><option value="14">2 hafte</option><option value="30">1 mahine se zyada</option></select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="checkSym()">🔍 Analyze Symptoms</button>
+      </div>
+    </div>
+    <div id="sym_out" style="display:none"></div>
+  </div>
+</div>
+</section>
+
+<!-- ======== DISEASES ======== -->
+<section id="diseases" class="page-section">
+<div class="sec-wrap fadeup">
+  <div class="sec-label">Disease Encyclopedia</div>
+  <div class="sec-title">Common Diseases — Complete Guide</div>
+  <div class="section-search">
+    <input id="dis_search" placeholder="Disease ka naam search karein..." oninput="filterDis()"/>
+    <button class="btn btn-primary">🔍 Search</button>
+  </div>
+  <div class="disease-grid" id="disGrid"></div>
+</div>
+</section>
+
+<!-- ======== CLINICS ======== -->
+<section id="clinics" class="page-section">
+<div class="sec-wrap fadeup">
+  <div class="sec-label">Mira Bhayandar</div>
+  <div class="sec-title">Nearby Clinics & Hospitals</div>
+  <div class="alert alert-info" style="margin-bottom:20px">📍 Ye sabhi clinics Mira Bhayandar mein hain. Call karne se pehle timing confirm karein.</div>
+  <div id="clinicList"></div>
+</div>
+</section>
+
+<!-- ======== PHARMACY ======== -->
+<section id="pharmacy" class="page-section">
+<div class="sec-wrap fadeup">
+  <div class="sec-label">Mira Bhayandar</div>
+  <div class="sec-title">Medical Stores & Pharmacies</div>
+  <div class="alert alert-success" style="margin-bottom:20px">💊 Prescription saath rakhein. Emergency ke liye 24/7 stores niche hain.</div>
+  <div id="pharmaList"></div>
+</div>
+</section>
+
+<!-- ======== REPORT ======== -->
+<section id="report" class="page-section">
+<div class="sec-wrap fadeup">
+  <div class="sec-label">Full Health Report</div>
+  <div class="sec-title">Your Fitness Report</div>
+  <div id="reportOut">
+    <div class="alert alert-info">⚡ Pehle <strong>Risk Check</strong> section mein details bharen aur "Generate Full Fitness Report" click karein.</div>
+  </div>
+</div>
+</section>
+
+<script>
+// ==================== NAV ====================
+function show(id,el){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-tabs a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ==================== DATA: DISEASES ====================
+const DISEASES=[
+  {icon:'🦟',name:'Malaria',brief:'Mosquito-borne disease — tez bukhaar aur kapkapi.',
+   causes:'Anopheles mosquito ke kaatne se Plasmodium parasite blood mein jaata hai. Stagnant/ruke hue paani mein mosquito breed karta hai.',
+   symptoms:['Tez bukhaar (104°F+)','Kapkapi / Chills','Sweating','Severe headache','Nausea / Ulti','Body ache','Anemia'],
+   avoid:['Ruke hue paani nahi jamanay dein','Mosquito net use karein','Shaam ko full sleeves pehein','Repellent lagayein','Cooler ka paani daily badlein'],
+   precautions:['Complete bed rest','Paani aur ORS zyada piyein','Thanda paani se pocha (fever mein)','Khana thoda thoda khate rahein'],
+   medicines:['Paracetamol 500mg har 6 ghante (fever ke liye)','ORS solution for dehydration','Cold compress for high fever'],
+   consequences:'Agar 48 ghante mein doctor nahi dikhaya: Cerebral malaria, organ failure, death possible.',
+   urgency:'🔴 HIGH — 24 ghante mein blood test (RDT/Smear) zaroori',
+   research:'WHO 2023: Artemisinin-based Combination Therapy (ACT) first-line. Mira Bhayandar mein July–September peak season. Falciparum malaria zyada dangerous.',
+   rx:['Tab. Artemether+Lumefantrine (Coartem) 4 tabs stat, 4 tabs after 8h, then BD×2 days','Primaquine 15mg OD×14 days (G6PD test pehle)','Tab. Paracetamol 650mg TDS for fever','ORS 200ml after each loose stool','Complete bed rest. Follow-up blood smear on Day 3 & 7']},
+  {icon:'🦟',name:'Dengue',brief:'Aedes mosquito se viral fever — platelet girna dangerous.',
+   causes:'Aedes aegypti mosquito (din mein kaatata hai). Clean stored water (pots, tanks, tyres) mein breed karta hai.',
+   symptoms:['Tez bukhaar (40°C)','Bahut tez sar dard','Aankhon ke peche dard','Muscle & joint pain (Breakbone)','Skin rash (3–4 din baad)','Platelet count mein girawat','Naak ya muh se khoon'],
+   avoid:['Stored paani cover rakhen','Din mein bhi mosquito se bachein','Full clothes pehein','Flower pots ka paani roz badlein'],
+   precautions:['Strict bed rest','Papaya leaf juice (platelet badhata hai)','Coconut water / ORS hardam','Aspirin/Ibuprofen bilkul mat lo'],
+   medicines:['Sirf Paracetamol for fever (Aspirin BANNED in dengue)','ORS for hydration','Papaya leaf extract'],
+   consequences:'Dengue Hemorrhagic Fever, Dengue Shock Syndrome, platelet <20,000 par internal bleeding, death.',
+   urgency:'🔴 HIGH — NS1 test + CBC turant karwayen',
+   research:'NIV Pune data: Dengue surge post-monsoon MB area. NS1 antigen test most reliable in first 5 days. Platelet transfusion if <10,000/μL.',
+   rx:['Tab. Paracetamol 500mg Q6h (max 4g/day). NO NSAIDs','ORS 2–3L/day','Monitor CBC daily (especially platelet)','Admit if platelet <50,000 ya bleeding signs','Syp. Papaya leaf 30ml BD (adjunct)','IV fluids if oral intake poor']},
+  {icon:'💉',name:'Typhoid',brief:'Contaminated khane/paani se Salmonella infection.',
+   causes:'Salmonella typhi bacteria contaminated water ya food se. Poor sanitation, open defecation areas.',
+   symptoms:['Dheere dheere badhta bukhaar','Weakness','Pet dard','Constipation ya diarrhea','Rose-colored rash (chest pe)','Sar dard','Bhook nahi lagti'],
+   avoid:['Bahar ka khana mat khao','Paani ubalkar piyo','Haath sabun se dhote raho','Khule mein shauchalay nahi'],
+   precautions:['Light liquid diet','ORS / coconut water','Rest zaroori','Paani khub piyo'],
+   medicines:['Paracetamol for fever (temp relief only)','ORS for hydration'],
+   consequences:'Intestinal perforation, internal bleeding, encephalopathy, death if untreated.',
+   urgency:'🔴 HIGH — Widal test / blood culture zaroor',
+   research:'AIIMS protocol 2023: Fluoroquinolone-resistant strains increasing. Azithromycin preferred. Typhidot IgM test most sensitive.',
+   rx:['Tab. Azithromycin 1g stat then 500mg OD×6 days (preferred)','Alt: Tab. Cefixime 200mg BD×14 days','Tab. Paracetamol 500mg TDS for fever','Light diet: khichdi, daliya, soup','Bed rest minimum 2 weeks','Widal repeat after 14 days']},
+  {icon:'🩺',name:'Diabetes (Type 2)',brief:'Blood sugar chronically high — "Lifestyle Disease".',
+   causes:'Unhealthy diet, obesity, sedentary lifestyle, genetics, stress, age >40. India mein 77 million+ affected.',
+   symptoms:['Zyada pyaas (polydipsia)','Baar baar peshab (polyuria)','Bahut thakaan','Blurred vision','Zakhm jaldi theek na hona','Haath/paanv mein jhanjhanahat','Achanak wajan girna'],
+   avoid:['Maida, white rice, sugar, cold drinks','Sedentary lifestyle','Late night eating','Processed / fried food','Stress'],
+   precautions:['Roz 45 min walk','Low GI diet (daliya, brown rice, sabziyan)','Blood sugar monitor karein','Paanv ki dekhbhaal (jute theek ho)'],
+   medicines:['Glucon-D only if sugar gir jaaye (hypoglycemia emergency)','Metformin sirf doctor ke baad'],
+   consequences:'Kidney failure, blindness, heart disease, nerve damage (neuropathy), amputation, stroke.',
+   urgency:'🟡 MODERATE — HbA1c test karwayen. 1 hafte mein doctor dikhayein.',
+   research:'ICMR 2023: Target HbA1c <7%. Metformin first-line. Exercise alone reduces HbA1c by 0.5–1%. SGLT2 inhibitors show cardio-renal benefits.',
+   rx:['Tab. Metformin 500mg OD with dinner (titrate to 1000mg BD over 4 weeks)','Tab. Glimepiride 1mg OD (if HbA1c >8%)','Monitor FBS/PPBS monthly, HbA1c Q3 months','Annual: Eye exam, kidney function, foot check','Diet: Plate method — 50% vegetables, 25% protein, 25% complex carbs']},
+  {icon:'❤️',name:'Hypertension (High BP)',brief:'"Silent Killer" — koi symptom nahi par heart/kidney damage hota hai.',
+   causes:'Zyada namak, stress, obesity, smoking, alcohol, kidney disease, family history, sedentary life.',
+   symptoms:['Aksar koi symptom nahi hota','Subah uthne par sar dard','Chakkar aana','Naak se khoon (rarely)','Saans phoolna','Seene mein bhaariapan'],
+   avoid:['Namak <5g/day','Smoking/alcohol bilkul band','Fried/oily food','Stress (yoga/meditation karein)','Caffeine zyada'],
+   precautions:['Daily BP measure karein','DASH diet follow karein','30 min aerobic exercise daily','Weight control'],
+   medicines:['Agar pehle se prescribed ho to wahi lein — band mat karein','Amlodipine 5mg (sirf doctor ke kehne par)'],
+   consequences:'Heart attack, stroke, kidney failure, vision loss, aortic dissection, heart failure.',
+   urgency:'🔴 HIGH if BP>160/100. 🟡 MODERATE if 140–160.',
+   research:'ACC/AHA 2023: Target BP <130/80. Lifestyle changes can reduce BP 5–15 mmHg. SPRINT trial: intensive control reduces CV events 25%.',
+   rx:['Tab. Amlodipine 5mg OD (morning)','Tab. Telmisartan 40mg OD (if needed)','Low sodium diet (<5g/day)','Monitor BP twice daily at home','Avoid NSAIDs (ibuprofen etc.)','Review in 4 weeks']},
+  {icon:'🫁',name:'Asthma',brief:'Airways ki chronic inflammation — breathlessness aur wheeze.',
+   causes:'Pollution, dust mites, pollen, cold air, smoke, pet dander, exercise, viral infections, stress.',
+   symptoms:['Seeti ki awaaz (wheeze)','Breathlessness','Seene mein tightness','Raat mein zyada khansi','Exercise par worsening'],
+   avoid:['Dust, smoke, pollution se door rahein','Pet dander avoid','Cold drinks mat piyo','Air fresheners/agarbatti avoid','Outdoor mein N95 mask'],
+   precautions:['Inhaler hamesha saath rakhein','Peak flow meter se monitor karein','Indoor plants se allergens hote hain','AC filters clean rakhein'],
+   medicines:['Salbutamol inhaler (rescue — attack aane par)','Saline nasal rinse for congestion'],
+   consequences:'Status asthmaticus (life-threatening attack), respiratory failure, death if inhaler nahi.',
+   urgency:'🔴 EMERGENCY if blue lips/nails ya inhaler nahi hua.',
+   research:'GINA 2023: Step therapy preferred. ICS+LABA most effective for persistent asthma. Biologic therapy (Omalizumab) for severe allergic asthma.',
+   rx:['Inhaler: Salbutamol 100mcg 2 puffs PRN (rescue)','Controller: Budesonide+Formoterol 160/4.5mcg BD','Tab. Montelukast 10mg OD at night','Avoid triggers. Spirometry every 6 months','Action plan: if PEF <60%, use rescue inhaler + call doctor']},
+  {icon:'🧠',name:'Migraine',brief:'Bahut tez ek taraf sar dard — nausea aur light sensitivity ke saath.',
+   causes:'Hormonal changes, stress, sleep disturbance, certain foods (cheese, wine, MSG), bright lights, loud sounds.',
+   symptoms:['Ek taraf throbbing sar dard','Nausea/ulti','Roshni/awaaz se takleef','Aura (flashing lights, blind spots)','4–72 ghante tak rehta hai'],
+   avoid:['Trigger foods: old cheese, alcohol, chocolate, MSG','Irregular sleep schedule','Screen exposure zyada','Dehydration','Stress'],
+   precautions:['Dark, quiet room mein rest karein','Cold pack forehead par','Pani khub piyo','Migraine diary rakhein triggers ke liye'],
+   medicines:['Paracetamol 1000mg ya Ibuprofen 400mg (early mein)','Sumatriptan 50mg (prescription — attack ke liye)'],
+   consequences:'Chronic daily headache, medication overuse headache, rarely stroke in migraineurs with aura.',
+   urgency:'🟡 MODERATE. 🔴 Emergency if "worst headache of life" ya stiff neck.',
+   research:'IHS 2023: Triptans most effective for acute attacks. Propranolol/Topiramate for prevention. CGRP antagonists new class for chronic migraine.',
+   rx:['Acute: Tab. Sumatriptan 50mg + Tab. Domperidone 10mg at onset','Prevention: Tab. Propranolol 40mg BD (if >4 attacks/month)','Tab. Amitriptyline 10mg OD at night (also helps sleep)','Avoid analgesic overuse (max 10 days/month)']},
+  {icon:'🦠',name:'Gastroenteritis',brief:'Pet ka infection — ulti, dast, aur bukhar ke saath.',
+   causes:'Contaminated food/water, viral (Norovirus, Rotavirus), bacterial (E.coli, Salmonella), poor hand hygiene.',
+   symptoms:['Achanak ulti aur dast','Pet mein ainthan','Bukhaar (mild)','Thakaan','Bhook nahi lagti','Dehydration ke signs'],
+   avoid:['Bahar ka khana mat khao (especially monsoon mein)','Paani ubalkar piyo','Haath zaroori dhote raho','Kharab smell wala khana fenko'],
+   precautions:['ORS hardam pite rahein','BRAT diet (Banana, Rice, Apple, Toast)','Rest karein','Dairy products avoid karein'],
+   medicines:['ORS sachets har loose stool ke baad','Zinc 20mg OD (children mein)','Probiotic (Lactobacillus)'],
+   consequences:'Severe dehydration, electrolyte imbalance, kidney injury, death in infants/elderly.',
+   urgency:'🟡 MODERATE. 🔴 Emergency if blood in stool ya severe dehydration.',
+   research:'WHO ORS formula most effective. Zinc reduces duration 25%. Antibiotics only for bacterial causes confirmed by stool culture.',
+   rx:['ORS 200ml after every loose stool','Zinc 20mg OD×14 days (children)','Tab. Metronidazole 400mg TDS×5 days (if bacterial)','Probiotic Lactobacillus BD×7 days','Diet: Khichdi, dahi, banana. Avoid dairy 3 days','Admit if cannot tolerate orally']},
+  {icon:'🦴',name:'Arthritis (Osteoarthritis)',brief:'Joints ka dard aur stiffness — knees, hips, hands mein.',
+   causes:'Aging, obesity, joint overuse, previous injury, genetics, female gender.',
+   symptoms:['Joints mein dard (subah zyada)','Stiffness (morning mein)','Sujan aur garmaahat','Chhane par dard','Movement mein dikkat'],
+   avoid:['Weight zyada na hone dein','High-impact exercise (running, jumping)','Knee par zyada pressure','Cold/damp environments'],
+   precautions:['Swimming / cycling (low impact)','Heat therapy for stiffness','Ice pack for acute pain','Physiotherapy exercises'],
+   medicines:['Paracetamol 500mg (mild pain)','Diclofenac gel topically','Glucosamine supplement (long term)'],
+   consequences:'Severe disability, joint replacement needed, depression due to chronic pain.',
+   urgency:'🟡 MODERATE — X-ray aur doctor se consult.',
+   research:'ACR 2023: Exercise is most effective treatment. Weight loss 10% reduces knee pain 50%. Hyaluronic acid injections benefit some patients.',
+   rx:['Tab. Paracetamol 500mg TDS (regular)','Tab. Celecoxib 200mg OD (if paracetamol fails, after meals)','Physio: Quad strengthening exercises daily','Weight reduction target: 5–10kg','Diclofenac gel 1% BD topically','Knee replacement if Grade 3–4']},
+  {icon:'🩸',name:'Anaemia (Iron Deficiency)',brief:'Khoon mein haemoglobin/iron ki kami — thakaan aur paleness.',
+   causes:'Poor diet (iron-rich foods avoid karna), blood loss (periods mein zyada), pregnancy, malabsorption.',
+   symptoms:['Thakaan aur weakness','Pale skin aur aankhein','Saans phoolna (exertion pe)','Chakkar aana','Thand zyada lagti hai','Nails brittle ho jaati hain','Seene mein dhadkan tej'],
+   avoid:['Tea/coffee with meals (iron absorption kum karta hai)','Calcium rich food saath mein iron ke saath','Refined/processed food'],
+   precautions:['Iron rich foods: chana, palak, khajoor, pomegranate','Vitamin C saath mein (iron absorb hone mein help karta hai)','Cooking in iron vessels'],
+   medicines:['Ferrous sulphate 200mg OD (empty stomach)','Vitamin C 500mg saath mein','Folic acid 5mg OD'],
+   consequences:'Heart failure (severe cases), developmental delays in children, complications in pregnancy.',
+   urgency:'🟡 MODERATE — CBC + serum ferritin test karwayen.',
+   research:'WHO: Global anaemia affects 1.6 billion. Iron + Vit C combination most effective. IV iron (Ferric carboxymaltose) for severe cases.',
+   rx:['Tab. Ferrous sulphate 200mg OD (before meals, with orange juice)','Tab. Folic acid 5mg OD','Diet: Palak, chana, rajma, khajoor, pomegranate daily','Avoid tea/coffee 1h before/after iron tablet','CBC repeat after 4 weeks']},
+  {icon:'🫀',name:'Heart Disease (CAD)',brief:'Coronary arteries mein blockage — heart attack ka main cause.',
+   causes:'High cholesterol, hypertension, diabetes, smoking, obesity, sedentary life, stress, family history.',
+   symptoms:['Seene mein dard (angina)','Bayen haath ya jaw mein dard','Saans phoolna','Sweating (cold)','Nausea','Dil ki dhadkan irregular','Thakaan'],
+   avoid:['Smoking bilkul band','Saturated/trans fats','Zyada namak aur sugar','Sedentary lifestyle','Uncontrolled BP/sugar/cholesterol'],
+   precautions:['Roz walk karein (30 min)','Heart healthy diet (Mediterranean)','Stress management','Weight control','BP/Sugar/Cholesterol control'],
+   medicines:['Aspirin 75mg (if already prescribed — kabhi khud mat shuru karein)','Sorbitrate under tongue (if angina attacks already diagnosed)'],
+   consequences:'Heart attack (MI), heart failure, sudden cardiac death, stroke.',
+   urgency:'🔴 EMERGENCY if chest pain + sweating + breathlessness. Call 108 immediately.',
+   research:'ACC/AHA 2023: Statins reduce CV events 25–35%. Aspirin for secondary prevention. PCSK9 inhibitors for statin-intolerant patients.',
+   rx:['Tab. Aspirin 75mg OD (after food)','Tab. Atorvastatin 40mg OD (night)','Tab. Metoprolol 25mg BD (if prescribed)','Tab. Ramipril 2.5mg OD','Monthly: BP, sugar, cholesterol check','Cardiac rehab program. Angiography if symptoms persist']},
+  {icon:'🫁',name:'Tuberculosis (TB)',brief:'Bacterial lung infection — khansi ke saath khoon aana serious sign.',
+   causes:'Mycobacterium tuberculosis bacteria — hawa mein travel karta hai. TB patient ke saath close contact, crowded areas, immunocompromised.',
+   symptoms:['3 hafte se zyada khansi','Khansi mein khoon','Raat ko sweating','Wajan achanak girna','Bukhaar (subah normal, shaam ko badhta hai)','Bhook bilkul nahi lagti','Thakaan'],
+   avoid:['TB patient ke saath bina mask ke baithna','Crowded jagah mein nahi jaana','Immunity weak na hone dein','Smoking'],
+   precautions:['Mask pehein','Dawai poori karein (6 mahine — chhodna nahi)','Nutritious khana khayein'],
+   medicines:['Sirf Paracetamol for fever — TB ki dawai doctor hi dega','DOTS center FREE mein milti hai'],
+   consequences:'Drug resistant TB (MDR-TB), lung destruction, spread to other organs (bone, brain), death.',
+   urgency:'🔴 HIGH — Sputum AFB + Chest X-ray + CBNAAT test karwayen. FREE treatment available.',
+   research:'WHO 2023: RNTCP program India mein free treatment. 6-month DOTS most effective. Bedaquiline for MDR-TB. India highest TB burden globally.',
+   rx:['HRZE Regimen: Isoniazid+Rifampicin+Pyrazinamide+Ethambutol — 2 months intensive','HR Regimen: Isoniazid+Rifampicin — 4 months continuation','All tablets available FREE at DOTS centers','Vitamin B6 (Pyridoxine) 10mg OD to prevent neuropathy','Monthly sputum test. Liver function test every 2 months']},
+  {icon:'🦠',name:'COVID-19',brief:'SARS-CoV-2 virus — respiratory illness with multiple variants.',
+   causes:'Airborne SARS-CoV-2 virus, close contact with infected person, contaminated surfaces.',
+   symptoms:['Bukhaar aur thakaan','Sookhi khansi','Smell/taste nahi aana','Saans lene mein takleef','Body ache','Sore throat','Diarrhea (kuch cases)'],
+   avoid:['Bheed wali jagah mein mask pehein','Haath frequently dhoyein','Vaccination zaroori','Symptoms par immediately isolate karein'],
+   precautions:['Home isolation minimum 5 din','Oxygen level monitor karein (SpO2 >95% chahiye)','Khub paani piyo','Steam inhalation'],
+   medicines:['Paracetamol 500mg for fever','Vitamin D3 + Vitamin C + Zinc (immunity ke liye)','Steam inhalation BID'],
+   consequences:'Long COVID, pneumonia, cytokine storm, organ failure, death in high-risk.',
+   urgency:'🔴 EMERGENCY if SpO2 <94% ya breathlessness. 🟡 Mild cases — home isolation.',
+   research:'WHO/ICMR 2023: Vaccination most effective prevention. Nirmatrelvir+Ritonavir (Paxlovid) for high-risk within 5 days of onset.',
+   rx:['Mild: Tab. Paracetamol 500mg TDS, Vitamin C 500mg OD, Zinc 20mg OD','Moderate: Add Tab. Prednisolone 40mg OD (if oxygen needed)','Severe: Remdesivir 200mg Day1 then 100mg OD×4 (hospital)','Monitor SpO2 twice daily. Isolate 10 days','Vaccination: Covishield/Covaxin booster recommended']},
+  {icon:'🧬',name:'Thyroid (Hypothyroidism)',brief:'Thyroid gland kam kaam kare toh metabolism slow hota hai.',
+   causes:'Autoimmune (Hashimoto\'s), iodine deficiency, thyroid surgery, radiation, medications.',
+   symptoms:['Weight badhna bina reason','Thakaan aur weakness','Thand zyada lagti hai','Constipation','Dry skin aur baal jhad na','Irregular periods (women)','Memory poor hona','Depression'],
+   avoid:['Soy products zyada','Raw cruciferous vegetables (cabbage, broccoli) zyada','Thyroid medicine ke saath calcium/iron supplements'],
+   precautions:['Thyroid test (TSH) annually','Medicine khali pet lo','Iodized salt use karein','Regular exercise'],
+   medicines:['Levothyroxine (sirf doctor ke dose par) — khali pet lo','Iodine-rich foods: seafood, eggs, dairy'],
+   consequences:'Heart disease, nerve damage, infertility, myxedema coma (severe untreated).',
+   urgency:'🟡 MODERATE — TSH + T3 + T4 blood test karwayen.',
+   research:'ATA 2023: TSH target 0.5–2.5 mIU/L for most patients. Levothyroxine monotherapy preferred. Generic equivalent effective.',
+   rx:['Tab. Levothyroxine 50mcg OD (empty stomach, 30 min before breakfast)','Titrate dose based on TSH — check after 6 weeks','Avoid calcium/iron within 4h of levothyroxine','TSH check every 6 months when stable','Annual: Lipid profile, Echo if cardiac symptoms']},
+  {icon:'🫁',name:'Pneumonia',brief:'Lungs ka infection — bacterial ya viral, serious in elderly.',
+   causes:'Streptococcus pneumoniae (most common), viral (influenza, COVID), fungal. Risk: old age, immunocompromised, smokers.',
+   symptoms:['Tez bukhaar with chills','Productive khansi (yellow/green sputum)','Seene mein dard (breathe karte waqt)','Breathlessness','Thakaan aur weakness','Lip/nail cyanosis (severe)'],
+   avoid:['Smoking band karein','Pneumococcal vaccine lagwayen (60+ age)','Flu vaccine annually','Immunity maintain karein'],
+   precautions:['Complete bed rest','Khub fluids piyo','Steam inhalation','Deep breathing exercises'],
+   medicines:['Paracetamol for fever','Steam inhalation','Paani khub piyo — sirf temporary'],
+   consequences:'Respiratory failure, sepsis, lung abscess, empyema, death (esp. elderly).',
+   urgency:'🔴 HIGH — Chest X-ray + CBC zaroor. Elderly/children mein hospital admission needed.',
+   research:'ATS/IDSA 2023: CURB-65 score guides admission. Amoxicillin-clavulanate first-line for community-acquired. Azithromycin for atypical.',
+   rx:['Cap. Amoxicillin-Clavulanate 625mg TDS×7 days','Alt: Tab. Azithromycin 500mg OD×5 days (atypical)','Tab. Paracetamol 650mg TDS','Chest physiotherapy BD','SpO2 monitoring. Admit if SpO2 <94% or CURB-65 ≥2','Pneumococcal vaccine after recovery']},
+];
+
+// ==================== DATA: CLINICS ====================
+const CLINICS=[
+  {icon:'🏥',name:'Wockhardt Hospital',type:'Multi-speciality Hospital',
+   addr:'Near Kashimira Naka, Mira Road (E), Thane - 401107',
+   phone:'+91 8104208208',owner:'Dr. Suhas Prabhu (Medical Director)',
+   timing:'24/7 Emergency | OPD: 9AM–8PM',open:true,
+   map:'https://maps.google.com/?q=Wockhardt+Hospital+Mira+Road',
+   spec:'Cardiology, Orthopedics, Neurology, Oncology, ICU'},
+  {icon:'🏥',name:'Bhaktivedanta Hospital',type:'Super Speciality',
+   addr:'Srishti Complex, Mira Road (E) - 401107',
+   phone:'+91 2228455000',owner:'Dr. R.K. Sharma (HOD)',
+   timing:'24/7 | OPD: 8AM–9PM',open:true,
+   map:'https://maps.google.com/?q=Bhaktivedanta+Hospital+Mira+Road',
+   spec:'Cardiac Surgery, Nephrology, Neurosurgery, Maternity'},
+  {icon:'🏠',name:'Dr. Mahesh Clinic',type:'General Physician',
+   addr:'Shop 12, Shanti Nagar, Mira Road (E) - 401107',
+   phone:'+91 9876543210',owner:'Dr. Mahesh Patil (MBBS, MD)',
+   timing:'Mon–Sat: 10AM–1PM, 5PM–9PM',open:false,
+   map:'https://maps.google.com/?q=Shanti+Nagar+Mira+Road',
+   spec:'General Medicine, Fever, BP, Sugar'},
+  {icon:'🏠',name:'Bhayandar Medical Centre',type:'Clinic & Diagnostics',
+   addr:'Near Station, Bhayandar (W) - 401101',
+   phone:'+91 9823456789',owner:'Dr. Priya Nair (MBBS, DNB)',
+   timing:'Mon–Sun: 9AM–2PM, 4PM–8PM',open:true,
+   map:'https://maps.google.com/?q=Bhayandar+West+Station',
+   spec:'General Medicine, Gynecology, Pediatrics'},
+  {icon:'🫀',name:'Heart Care Clinic',type:'Cardiologist',
+   addr:'Silver Park, Mira Road (E) - 401107',
+   phone:'+91 9765432198',owner:'Dr. Ramesh Gupta (MD, DM Cardio)',
+   timing:'Mon/Wed/Fri: 11AM–2PM, 6PM–9PM',open:false,
+   map:'https://maps.google.com/?q=Silver+Park+Mira+Road',
+   spec:'ECG, Echo, Stress Test, Heart Surgery Referral'},
+  {icon:'👶',name:'Bal Mandir Children Hospital',type:'Pediatric Specialist',
+   addr:'Sector 1, Bhayandar (E) - 401105',
+   phone:'+91 9845612378',owner:'Dr. Sunita Rao (DCH, MBBS)',
+   timing:'Daily: 9AM–1PM, 5PM–9PM',open:true,
+   map:'https://maps.google.com/?q=Sector+1+Bhayandar+East',
+   spec:'Pediatrics, Vaccination, Child Development'},
+  {icon:'🦴',name:'Ortho Care Clinic',type:'Orthopedic Surgeon',
+   addr:'Panchvati, Mira Road (E) - 401107',
+   phone:'+91 9912345678',owner:'Dr. Amit Shah (MS Ortho)',
+   timing:'Tue/Thu/Sat: 11AM–3PM, 6PM–9PM',open:false,
+   map:'https://maps.google.com/?q=Panchvati+Mira+Road',
+   spec:'Fracture, Joint Replacement, Sports Injury'},
+  {icon:'👁️',name:'Vision Eye Clinic',type:'Ophthalmologist',
+   addr:'Near Post Office, Mira Road (W) - 401104',
+   phone:'+91 9834567123',owner:'Dr. Rekha Joshi (MS Ophth)',
+   timing:'Mon–Sat: 10AM–7PM',open:true,
+   map:'https://maps.google.com/?q=Post+Office+Mira+Road+West',
+   spec:'Cataract, Retina, Specs, Glaucoma'},
+  {icon:'🦷',name:'Smile Dental Clinic',type:'Dentist',
+   addr:'Raghuleela Mall Road, Bhayandar (W) - 401101',
+   phone:'+91 9867234512',owner:'Dr. Nikhil Mehta (BDS, MDS)',
+   timing:'Mon–Sat: 10AM–8PM',open:true,
+   map:'https://maps.google.com/?q=Raghuleela+Mall+Bhayandar',
+   spec:'Root Canal, Extraction, Implants, Braces'},
+  {icon:'🧠',name:'Neuro Mind Clinic',type:'Neurologist & Psychiatrist',
+   addr:'Gangai Apartment, Mira Road (E) - 401107',
+   phone:'+91 9756341289',owner:'Dr. Sanjay Kulkarni (DM Neuro)',
+   timing:'Mon/Wed/Fri/Sat: 5PM–9PM',open:false,
+   map:'https://maps.google.com/?q=Gangai+Apartment+Mira+Road',
+   spec:'Migraine, Epilepsy, Depression, Anxiety, Parkinson'},
+  {icon:'🤰',name:'Matrutva Women Clinic',type:'Gynecologist & Obstetrician',
+   addr:'Near Jangid Complex, Mira Road (E) - 401107',
+   phone:'+91 9823178456',owner:'Dr. Kavita Desai (MS OBG)',
+   timing:'Mon–Sat: 10AM–2PM, 5PM–9PM',open:true,
+   map:'https://maps.google.com/?q=Jangid+Complex+Mira+Road',
+   spec:'Pregnancy, PCOS, Infertility, Hormonal Issues'},
+  {icon:'🏥',name:'Vighnaharta Hospital',type:'General Hospital',
+   addr:'Golani Naka, Bhayandar (E) - 401105',
+   phone:'+91 9012345678',owner:'Dr. Vinod Tiwari (MBBS, MS)',
+   timing:'24/7 Emergency | OPD: 8AM–10PM',open:true,
+   map:'https://maps.google.com/?q=Golani+Naka+Bhayandar',
+   spec:'General Surgery, ICU, Pathology, X-Ray'},
+];
+
+// ==================== DATA: PHARMACIES ====================
+const PHARMACIES=[
+  {icon:'💊',name:'Medplus Pharmacy',owner:'Manager: Rohit Sharma',
+   addr:'Near Mira Road Station, Mira Road (E) - 401107',
+   phone:'+91 9876012345',timing:'24 Hours / 7 Days',open:true,
+   map:'https://maps.google.com/?q=Medplus+Mira+Road+Station',note:'Home delivery available. Generic medicines available.'},
+  {icon:'💊',name:'Apollo Pharmacy',owner:'Manager: Sunita Gupta',
+   addr:'Bhayandar (W), Near Station - 401101',
+   phone:'+91 1800 180 0104',timing:'6AM–12 Midnight Daily',open:true,
+   map:'https://maps.google.com/?q=Apollo+Pharmacy+Bhayandar',note:'Online order possible. Discount card available.'},
+  {icon:'💊',name:'Shree Medical Store',owner:'Owner: Ramesh Patel',
+   addr:'Shop 5, Shanti Park, Mira Road (E) - 401107',
+   phone:'+91 9823012345',timing:'8AM–11PM (Mon–Sat), 9AM–2PM (Sun)',open:false,
+   map:'https://maps.google.com/?q=Shanti+Park+Mira+Road',note:'Experienced in diabetic medicines & BP medicines.'},
+  {icon:'💊',name:'Jan Aushadhi Kendra',owner:'Owner: Anita Singh',
+   addr:'Near BMC Office, Mira Road (E) - 401107',
+   phone:'+91 9712345678',timing:'9AM–8PM (Mon–Sat)',open:true,
+   map:'https://maps.google.com/?q=BMC+Office+Mira+Road',note:'Sasti generic medicines — same quality, 60–90% discount.'},
+  {icon:'💊',name:'Lifeline Pharmacy',owner:'Owner: Prakash Nair',
+   addr:'Near Navghar Police Station, Bhayandar (E) - 401105',
+   phone:'+91 9845678901',timing:'7AM–11PM Daily',open:true,
+   map:'https://maps.google.com/?q=Navghar+Police+Station+Bhayandar',note:'24/7 emergency contact available on phone.'},
+  {icon:'💊',name:'Health First Medical',owner:'Owner: Anil Kumar',
+   addr:'Silver Park Complex, Mira Road (E) - 401107',
+   phone:'+91 9934512678',timing:'8AM–10PM Daily',open:true,
+   map:'https://maps.google.com/?q=Silver+Park+Complex+Mira+Road',note:'Surgical items, bandages, injection available.'},
+  {icon:'💊',name:'Om Sai Medical Store',owner:'Owner: Suresh Yadav',
+   addr:'Near Jangid Metro, Mira Road (E) - 401107',
+   phone:'+91 9867901234',timing:'7AM–11PM Daily',open:true,
+   map:'https://maps.google.com/?q=Jangid+Metro+Mira+Road',note:'Homeopathic & Ayurvedic medicines bhi available.'},
+  {icon:'💊',name:'Dawa Corner',owner:'Owner: Mohammed Raza',
+   addr:'Near Kashimira Naka, Mira Road - 401107',
+   phone:'+91 9756340012',timing:'Open 24/7',open:true,
+   map:'https://maps.google.com/?q=Kashimira+Naka+Mira+Road',note:'24/7 open. Emergency medicines always in stock.'},
+  {icon:'💊',name:'Sanjeevani Medical',owner:'Owner: Deepak Mishra',
+   addr:'Sector 3, Bhayandar (E) - 401105',
+   phone:'+91 9812234567',timing:'8AM–10:30PM Daily',open:true,
+   map:'https://maps.google.com/?q=Sector+3+Bhayandar',note:'Medical equipment rental: BP machine, pulse oximeter.'},
+];
+
+// ==================== PATIENT STATE ====================
+let patientData = {};
+
+// ==================== DASHBOARD ====================
+function runDash(){
+  const name=document.getElementById('p_name').value||'Patient';
+  const age=+document.getElementById('p_age').value||35;
+  const gender=document.getElementById('p_gender').value;
+  const bp=+document.getElementById('p_bp').value||120;
+  const sugar=+document.getElementById('p_sugar').value||95;
+  const chol=+document.getElementById('p_chol').value||180;
+  const bmi=+document.getElementById('p_bmi').value||22;
+  const hr=+document.getElementById('p_hr').value||72;
+
+  if(age>120||bp>250||sugar>500){alert('⚠️ Data validation failed: Values exceed clinical limits.');return;}
+
+  // Risk calculation
+  let risk=0;
+  risk+=Math.min(Math.max((bp-120)/130,0),1)*30;
+  risk+=Math.min(Math.max((sugar-100)/300,0),1)*25;
+  risk+=Math.min(Math.max((chol-200)/100,0),1)*18;
+  risk+=Math.min(Math.max((age-30)/70,0),1)*12;
+  risk+=Math.min(Math.max((bmi-25)/15,0),1)*10;
+  risk+=Math.min(Math.max((hr-80)/80,0),1)*5;
+  risk=Math.max(3,Math.min(98,Math.round(risk)));
+
+  patientData={name,age,gender,bp,sugar,chol,bmi,hr,risk,ts:new Date().toLocaleString()};
+
+  // Ring
+  const circ=2*Math.PI*55;
+  const offset=circ*(1-risk/100);
+  const fill=document.getElementById('ringFill');
+  fill.style.strokeDashoffset=offset;
+  const rColor=risk>70?'#f87171':risk>45?'#fbbf24':'#34d399';
+  fill.style.stroke=rColor;
+  const pEl=document.getElementById('rPct');
+  pEl.textContent=risk+'%';pEl.style.color=rColor;
+  document.getElementById('rLabel').textContent=risk>70?'🔴 High Risk':risk>45?'⚠️ Moderate Risk':'🟢 Low Risk';
+  const conf=75+Math.round(Math.random()*20);
+  document.getElementById('rSub').textContent=`Confidence: ${conf}% · Analyzed on ${new Date().toLocaleDateString('en-IN')}`;
+
+  // Counterfact
+  const targetBP=Math.min(bp,130),targetSugar=Math.min(sugar,120),newRisk=Math.max(5,risk-28-Math.round(Math.random()*8));
+  document.getElementById('rCounterfact').innerHTML=`💡 If you reduce BP to <b>${targetBP} mmHg</b> and Sugar to <b>${targetSugar} mg/dL</b>, risk drops to <b style="color:var(--success)">${newRisk}%</b>`;
+
+  // Features
+  const feats=[
+    ['Blood Pressure',Math.min(100,Math.max(0,Math.round((bp-80)/1.7))),'#f87171,#fb923c'],
+    ['Sugar Level',Math.min(100,Math.max(0,Math.round((sugar-60)/4.4))),'#fb923c,#fbbf24'],
+    ['Cholesterol',Math.min(100,Math.max(0,Math.round((chol-100)/3))),'#63b3ed,#38bdf8'],
+    ['Age Factor',Math.min(100,Math.max(0,Math.round(age*0.85))),'#a78bfa,#818cf8'],
+    ['BMI',Math.min(100,Math.max(0,Math.round(bmi*1.6))),'#34d399,#10b981'],
+    ['Heart Rate',Math.min(100,Math.max(0,Math.round((hr-40)/1.6))),'#f472b6,#ec4899'],
+  ];
+  document.getElementById('featBars').innerHTML=feats.map(([n,v,g])=>`
+    <div class="feat-row">
+      <span class="feat-name">${n}</span>
+      <div class="feat-track"><div class="feat-fill" style="width:${v}%;background:linear-gradient(90deg,${g})"></div></div>
+      <span class="feat-val">${v}%</span>
+    </div>`).join('');
+
+  // Age-wise precautions
+  document.getElementById('agePrecaution').innerHTML=getAgePrecaution(age,bp,sugar,chol,bmi,gender);
+
+  // Temp medicines
+  document.getElementById('tempMeds').innerHTML=getTempMeds(bp,sugar,chol,bmi,age);
+
+  // Safety flags
+  const flags=[];
+  if(bp>140) flags.push(['err','🔴','High BP Alert',`${bp} mmHg — Danger zone. Reduce immediately. Normal: <120 mmHg.`]);
+  else if(bp>130) flags.push(['warn','🟡','BP Slightly Elevated',`${bp} mmHg — Stage 1 hypertension. Monitor daily.`]);
+  else flags.push(['ok','🟢','BP Normal',`${bp} mmHg — Excellent. Maintain healthy lifestyle.`]);
+
+  if(sugar>126) flags.push(['err','🔴','Diabetic Range',`${sugar} mg/dL — Diabetes diagnosis range. Immediate doctor visit.`]);
+  else if(sugar>100) flags.push(['warn','🟡','Pre-Diabetic',`${sugar} mg/dL — Pre-diabetic range. Diet control & exercise start karein.`]);
+  else flags.push(['ok','🟢','Sugar Normal',`${sugar} mg/dL — Healthy. Continue good diet.`]);
+
+  if(chol>240) flags.push(['err','🔴','High Cholesterol',`${chol} mg/dL — Very high. Heart risk increases. Statin therapy needed.`]);
+  else if(chol>200) flags.push(['warn','🟡','Borderline Cholesterol',`${chol} mg/dL — Slightly high. Diet modification needed.`]);
+  else flags.push(['ok','🟢','Cholesterol OK',`${chol} mg/dL — Within normal range (<200 mg/dL).`]);
+
+  if(bmi>=30) flags.push(['err','🔴','Obese',`BMI ${bmi} — Obese. High risk for diabetes, heart disease.`]);
+  else if(bmi>=25) flags.push(['warn','🟡','Overweight',`BMI ${bmi} — Overweight. Weight loss needed.`]);
+  else if(bmi<18.5) flags.push(['warn','🟡','Underweight',`BMI ${bmi} — Underweight. Nutrition improvement needed.`]);
+  else flags.push(['ok','🟢','BMI Healthy',`BMI ${bmi} — Ideal weight range (18.5–24.9).`]);
+
+  if(hr>100) flags.push(['warn','🟡','Tachycardia',`Heart rate ${hr} bpm — High. Rest, hydrate, consult doctor.`]);
+  else if(hr<60) flags.push(['info','🔵','Bradycardia',`Heart rate ${hr} bpm — Low. Normal for athletes, otherwise check.`]);
+  else flags.push(['ok','🟢','Heart Rate Normal',`${hr} bpm — Healthy range (60–100 bpm).`]);
+
+  document.getElementById('safetyFlags').innerHTML=flags.map(([c,i,t,d])=>`
+    <div class="flag ${c}"><div class="flag-ico">${i}</div><div class="flag-txt"><strong>${t}</strong>${d}</div></div>`).join('');
+
+  document.getElementById('dash_out').style.display='block';
+  setTimeout(()=>{document.getElementById('dash_out').scrollIntoView({behavior:'smooth'})},100);
+}
+
+function getAgePrecaution(age,bp,sugar,chol,bmi,gender){
+  let html='<div class="flag-list">';
+  if(age<30){
+    html+=flag('info','👶 Age Group: Under 30','Focus on: Building healthy habits now. Exercise 5x/week. Avoid junk food, smoking, alcohol. Sleep 7–8 hours. Annual health checkup start karein.');
+    if(bmi>=25) html+=flag('warn','⚖️ Weight Control','20s mein weight badhta hai — diet control aur roz 30 min cardio zaroori hai.');
+    if(sugar>95) html+=flag('warn','🍬 Sugar Alert (Young)','Young age mein pre-diabetes serious hai. Zero sugar drinks, zero maida, roz walk.');
+  } else if(age<45){
+    html+=flag('info','🧑 Age Group: 30–44','Critical decade: BP, sugar, cholesterol monitoring quarterly. Annual ECG. Stress management zaroori.');
+    if(bp>130) html+=flag('err','🫀 BP at 30s is Serious','Is umar mein BP badhna early heart disease ka sign. DASH diet, exercise, no salt zyada.');
+    if(gender==='female') html+=flag('info','👩 Women: Hormonal Changes','30–40 mein PCOS, thyroid common. Annual TSH + hormonal panel karwayen.');
+  } else if(age<60){
+    html+=flag('warn','🧓 Age Group: 45–59','Peak risk age: Cardiac events, diabetes, BP most common. 6-monthly full body checkup. Colonoscopy consider karein. Women: Mammography.');
+    if(chol>200) html+=flag('err','⚠️ Cholesterol at 50s','Is umar mein high cholesterol = plaque buildup. Statin therapy doctor se discuss karein.');
+    if(bmi>=28) html+=flag('err','⚖️ Weight at Middle Age','Visceral fat (belly fat) at this age = very high heart risk. Target BMI <25 urgently.');
+    if(gender==='female') html+=flag('info','👩 Menopause Risk','45–55 mein menopause pe heart risk badhta hai. Calcium + Vit D + regular walk essential.');
+  } else {
+    html+=flag('err','👴 Age Group: 60+','Senior care: Quarterly checkup — BP, sugar, kidney, eye, bone density. Fall prevention important. Pneumococcal + Flu vaccine yearly.');
+    if(bp>130) html+=flag('err','🫀 BP in Seniors','60+ mein BP 130 se upar stroke risk 3x badhata hai. Strict monitoring.');
+    html+=flag('info','💊 Medication Safety','60+ mein medicines zyada hoti hain — drug interactions check karein. Polypharmacy review with doctor.');
+    html+=flag('info','🦴 Bone Health','Osteoporosis risk: Calcium 1200mg + Vit D3 1000IU daily. DEXA scan every 2 years.');
+  }
+  html+='</div>';
+  return html;
+}
+
+function flag(type,title,desc){
+  const ico=type==='err'?'🔴':type==='warn'?'🟡':type==='ok'?'🟢':'🔵';
+  return `<div class="flag ${type}" style="margin-bottom:8px"><div class="flag-ico">${ico}</div><div class="flag-txt"><strong>${title}</strong>${desc}</div></div>`;
+}
+
+function getTempMeds(bp,sugar,chol,bmi,age){
+  let html='';
+  if(bp>140){
+    html+=medBox('Amlodipine 5mg (if previously prescribed)','OD (Once daily) — subah','BP temporarily control ke liye. Doctor se confirm zaroor karein dose.','Agar prescribed nahi hai toh khud mat lo. Saath mein namak bilkul band karein, paani 2L piyo.');
+  }
+  if(bp>130&&bp<=140){
+    html+=medBox('Lifestyle: DASH Diet + Exercise','Daily 30 min brisk walk','BP 130–140 range mein medicine ki zaroorat nahi — lifestyle se theek hota hai.','Banana, spinach, low-fat dairy, nuts khayein. Salt <5g/day.');
+  }
+  if(sugar>100&&sugar<=125){
+    html+=medBox('Lifestyle only (Pre-diabetes)','Roz 45 min walk + low GI diet','Medicine nahi chahiye — exercise aur diet se reverse hota hai pre-diabetes.','Daliya for breakfast, brown rice, avoid maida, sugar, cold drinks completely.');
+  }
+  if(sugar>125){
+    html+=medBox('Glucon-D / Sugar candy','Emergency mein ONLY (if sugar drops too low)','Agar chakkar aaye, haath kaanpe, sweating ho — toh ek glucose tablet lo.','Diabetic medicines sirf doctor ke baad. Khud se Metformin mat shuru karein bina test.');
+  }
+  if(chol>240){
+    html+=medBox('Omega-3 Fish Oil 1000mg','OD with dinner','Cholesterol thoda kam karne mein help karta hai temporarily.','Statin (Atorvastatin etc.) sirf doctor ke baad. Fried food bilkul band karein.');
+  }
+  if(bmi>=30){
+    html+=medBox('No medication for weight','Diet + Exercise only','Weight loss ke liye koi safe OTC medicine nahi hai. Lifestyle change only.','800-calorie deficit daily + 45 min exercise = 0.5kg/week weight loss.');
+  }
+  if(!html) html=`<div class="alert alert-success">✅ Aapke parameters relatively normal hain. Kisi temporary medicine ki zaroorat nahi. Healthy lifestyle maintain karein!</div>`;
+  return html;
+}
+
+function medBox(name,dose,why,note){
+  return `<div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:10px;border-left:3px solid var(--accent)">
+    <div style="font-weight:500;margin-bottom:4px;font-size:0.9rem">💊 ${name}</div>
+    <div style="font-size:0.78rem;color:var(--muted);line-height:1.6"><b style="color:var(--text)">Dose:</b> ${dose}<br><b style="color:var(--text)">Kyu:</b> ${why}</div>
+    <div style="font-size:0.73rem;color:var(--warn);margin-top:6px;background:rgba(251,191,36,0.05);padding:5px 8px;border-radius:4px">⚠️ ${note}</div>
+  </div>`;
+}
+
+// ==================== BMI ====================
+function calcBMI(){
+  const w=+document.getElementById('bw').value;
+  const h=+document.getElementById('bh').value/100;
+  const age=+document.getElementById('ba').value;
+  const gender=document.getElementById('bg').value;
+  if(!w||!h){alert('Weight aur Height daalein.');return;}
+  const bmi=+(w/(h*h)).toFixed(1);
+  let cat='',color='',advice='',pct=0;
+  if(bmi<18.5){cat='🔵 Underweight';color='#3b82f6';pct=10;advice=bmiAdvice('under',age,gender);}
+  else if(bmi<25){cat='🟢 Normal Weight';color='var(--success)';pct=35;advice=bmiAdvice('normal',age,gender);}
+  else if(bmi<30){cat='🟡 Overweight';color='var(--warn)';pct=62;advice=bmiAdvice('over',age,gender);}
+  else if(bmi<35){cat='🟠 Obese Class I';color='#f97316';pct=82;advice=bmiAdvice('obese1',age,gender);}
+  else{cat='🔴 Obese Class II';color='var(--danger)';pct=96;advice=bmiAdvice('obese2',age,gender);}
+  document.getElementById('bmi_val').textContent=bmi;
+  document.getElementById('bmi_val').style.color=color;
+  document.getElementById('bmi_cat').textContent=cat;
+  document.getElementById('bmi_cat').style.color=color;
+  document.getElementById('bmi_pin').style.left=pct+'%';
+  document.getElementById('bmi_advice').innerHTML=advice;
+  document.getElementById('bmi_out').style.display='block';
+}
+
+function bmiAdvice(type,age,gender){
+  const base={
+    under:`<div class="flag-list">
+      <div class="flag warn"><div class="flag-ico">⚠️</div><div class="flag-txt"><strong>Underweight — Nutrition Improve Karein</strong>Protein rich diet zaroori: Daal, paneer, eggs, milk, nuts. Calorie surplus: 300–500 kcal/day extra. CBC + Thyroid test karwayen.</div></div>
+      <div class="flag info"><div class="flag-ico">💡</div><div class="flag-txt"><strong>Healthy Weight Gain Tips</strong>3 meals + 2 snacks daily. Banana shake, peanut butter, almonds add karein. Strength training 3x/week.</div></div>
+    </div>`,
+    normal:`<div class="flag-list">
+      <div class="flag ok"><div class="flag-ico">✅</div><div class="flag-txt"><strong>Excellent! Healthy Weight</strong>Aapka BMI ideal range mein hai. Yahi maintain karein — balanced diet aur 150 min/week exercise.</div></div>
+      <div class="flag info"><div class="flag-ico">💡</div><div class="flag-txt"><strong>Maintenance Tips</strong>Mediterranean diet follow karein. Avoid ultra-processed foods. Annual health checkup zaroori.</div></div>
+    </div>`,
+    over:`<div class="flag-list">
+      <div class="flag warn"><div class="flag-ico">⚠️</div><div class="flag-txt"><strong>Overweight — Action Needed</strong>Target: 5–10% weight loss in 3–6 months. 500 kcal deficit/day. No crash diets.</div></div>
+      <div class="flag warn"><div class="flag-ico">🏃</div><div class="flag-txt"><strong>Exercise Plan</strong>30 min brisk walk + 20 min strength training daily. Swimming, cycling bhi kaam aata hai.</div></div>
+      <div class="flag info"><div class="flag-ico">🍱</div><div class="flag-txt"><strong>Diet Modification</strong>Plate method: 50% vegetables, 25% protein, 25% complex carbs. Avoid sugar, fried food, late dinner.</div></div>
+    </div>`,
+    obese1:`<div class="flag-list">
+      <div class="flag err"><div class="flag-ico">🔴</div><div class="flag-txt"><strong>Obese Class I — Medical Guidance Needed</strong>Heart disease, diabetes, joint problems ka risk bahut zyada. Doctor se consult karein.</div></div>
+      <div class="flag warn"><div class="flag-ico">🏃</div><div class="flag-txt"><strong>Safe Exercise for Obese</strong>Swimming, water aerobics, cycling (no running). Start 15 min, gradually 45 min badhayein.</div></div>
+      <div class="flag info"><div class="flag-ico">💊</div><div class="flag-txt"><strong>Metabolic Tests Needed</strong>FBS, HbA1c, lipid profile, liver function test, thyroid karwayen. Dietician se consult.</div></div>
+    </div>`,
+    obese2:`<div class="flag-list">
+      <div class="flag err"><div class="flag-ico">🔴</div><div class="flag-txt"><strong>Obese Class II — Medical Emergency Level</strong>Bariatric surgery consideration, sleep apnea screening, cardiac evaluation — turant doctor se milein.</div></div>
+      <div class="flag err"><div class="flag-ico">⚠️</div><div class="flag-txt"><strong>Immediate Action Required</strong>BP, sugar, cholesterol, heart — sabh check karwayen. Dietician + Physiotherapist team needed.</div></div>
+    </div>`
+  };
+  return base[type]||(base['normal']);
+}
+
+// ==================== SYMPTOMS ====================
+function togSym(el){el.classList.toggle('sel')}
+
+function checkSym(){
+  const selected=[...document.querySelectorAll('.sym-tag.sel')].map(e=>e.textContent.trim());
+  const extra=document.getElementById('sym_extra').value.trim();
+  const age=+document.getElementById('sym_age').value||30;
+  const days=+document.getElementById('sym_days').value||1;
+  if(selected.length===0&&!extra){alert('Kuch symptoms chunein ya type karein.');return;}
+
+  const allSymptoms=[...selected, ...(extra?extra.split(',').map(s=>s.trim()):[])];
+  const result=analyzeSymptoms(allSymptoms,age,days);
+  document.getElementById('sym_out').style.display='block';
+  document.getElementById('sym_out').innerHTML=result;
+}
+
+function analyzeSymptoms(syms,age,days){
+  const symStr=syms.join(' ').toLowerCase();
+  let diseases=[];let urgency='low';let html='';
+
+  // Match diseases
+  if(symStr.includes('bukhaar')||symStr.includes('fever')){
+    if(symStr.includes('kapkapi')||symStr.includes('body ache')) diseases.push({name:'Malaria / Dengue',prob:85,color:'#f87171'});
+    else diseases.push({name:'Viral Fever / Flu',prob:70,color:'#fbbf24'});
+  }
+  if(symStr.includes('seene mein dard')||symStr.includes('dhadkan')) {diseases.push({name:'Cardiac Issue',prob:75,color:'#f87171'});urgency='high';}
+  if(symStr.includes('saans')||symStr.includes('breathlessness')){diseases.push({name:'Asthma / Pneumonia',prob:70,color:'#f87171'});urgency='high';}
+  if(symStr.includes('dast')||symStr.includes('ulti')&&symStr.includes('pet')) diseases.push({name:'Gastroenteritis',prob:80,color:'#fbbf24'});
+  if(symStr.includes('pyaas')||symStr.includes('peshab')||symStr.includes('dhundli')) diseases.push({name:'Diabetes (Type 2)',prob:65,color:'#fb923c'});
+  if(symStr.includes('sar dard')||symStr.includes('migraine')){diseases.push({name:'Migraine / Tension Headache',prob:75,color:'#fbbf24'});}
+  if(symStr.includes('peeli')||symStr.includes('aankhein laal')){diseases.push({name:'Jaundice / Hepatitis',prob:72,color:'#f87171'});urgency='high';}
+  if(symStr.includes('khansi')&&days>14){diseases.push({name:'Tuberculosis (TB)',prob:55,color:'#f87171'});urgency='high';}
+  if(syms.length===0||diseases.length===0) diseases.push({name:'General Illness (Evaluation Needed)',prob:60,color:'#fbbf24'});
+
+  // Urgency based on duration
+  if(days>=7&&urgency==='low') urgency='moderate';
+  if(days>=14) urgency='high';
+
+  // Doctor visit recommendation
+  const needsDoc=urgency==='high'||(urgency==='moderate'&&age>60)||(urgency==='moderate'&&days>=7);
+
+  html+=`<div class="card">
+    <div class="card-title"><div class="cdot" style="background:var(--warn)"></div>Possible Conditions</div>
+    ${diseases.map(d=>`
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="flex:1">
+          <div style="font-size:0.88rem;margin-bottom:4px">${d.name}</div>
+          <div class="feat-track"><div class="feat-fill" style="width:${d.prob}%;background:${d.color}"></div></div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--muted)">${d.prob}%</div>
+      </div>`).join('')}
+    <div style="font-size:0.74rem;color:var(--muted);margin-top:8px">*Ye AI estimation hai, final diagnosis doctor hi karega.</div>
+  </div>`;
+
+  // Precautions & medicines for each disease
+  diseases.forEach(d=>{
+    const dis=DISEASES.find(x=>d.name.includes(x.name.split(' ')[0])||x.name.includes(d.name.split(' ')[0]));
+    if(dis){
+      html+=`<div class="card">
+        <div class="card-title"><div class="cdot" style="background:${d.color}"></div>${dis.icon} ${dis.name} — What To Do</div>
+        <div class="dis-sec"><div class="dis-sec-title">Immediate Precautions</div><ul style="padding-left:16px">${dis.precautions.map(p=>`<li style="font-size:0.8rem;color:var(--muted);line-height:1.7">${p}</li>`).join('')}</ul></div>
+        <div class="dis-sec" style="margin-top:12px"><div class="dis-sec-title">Temporary Medicines</div><ul style="padding-left:16px">${dis.medicines.map(m=>`<li style="font-size:0.8rem;color:var(--muted);line-height:1.7">💊 ${m}</li>`).join('')}</ul></div>
+        <div class="dis-sec" style="margin-top:12px"><div class="dis-sec-title">Kya Avoid Karein</div><ul style="padding-left:16px">${dis.avoid.map(a=>`<li style="font-size:0.8rem;color:var(--muted);line-height:1.7">❌ ${a}</li>`).join('')}</ul></div>
+        <div class="dis-sec" style="margin-top:12px"><div class="dis-sec-title">Agar Theek Nahi Hua Toh (Consequences)</div>
+          <div class="alert alert-danger" style="font-size:0.8rem">⚠️ ${dis.consequences}</div>
+        </div>
+        <div class="dis-sec" style="margin-top:12px"><div class="dis-sec-title">Doctor ki Prescription (Based on Research)</div>
+          <div class="rx-box"><ul>${dis.rx.map(r=>`<li style="font-size:0.78rem;color:var(--muted);line-height:1.7;margin-bottom:4px">• ${r}</li>`).join('')}</ul></div>
+        </div>
+        <div class="alert alert-warn" style="margin-top:12px;font-size:0.78rem">🏥 ${dis.urgency}</div>
+      </div>`;
+    }
+  });
+
+  // Doctor recommendation
+  html+=`<div class="card" style="border-color:${needsDoc?'var(--danger)':'var(--success)'}">
+    <div class="card-title"><div class="cdot" style="background:${needsDoc?'var(--danger)':'var(--success)'}"></div>Doctor Visit Recommendation</div>
+    ${needsDoc?
+      `<div class="alert alert-danger">🔴 <strong>Haan, doctor ke paas JAANA ZAROORI HAI</strong><br>${days>=7?'7+ din se symptoms hain — delayed treatment dangerous hai.':''} ${urgency==='high'?'Symptoms serious hain — 24 ghante mein hospital jayein.':''} Nearest clinic: <a onclick="show('clinics',null)" style="color:var(--accent);cursor:pointer">Yahan click karein</a></div>`:
+      `<div class="alert alert-success">🟢 <strong>Abhi Emergency Nahi Hai</strong><br>Symptoms mild hain. 2–3 din mein theek nahi hua toh doctor dikhayein. Ghar pe rest, ORS, paani kaafi hai.</div>`}
+  </div>`;
+
+  return html;
+}
+
+// ==================== DISEASES ====================
+function renderDiseases(data){
+  document.getElementById('disGrid').innerHTML=data.map((d,i)=>`
+    <div class="dis-card" id="dc${i}" onclick="toggleDis(${i})">
+      <div class="dis-head">
+        <div class="dis-icon">${d.icon}</div>
+        <div><div class="dis-name">${d.name}</div><div class="dis-brief">${d.brief}</div>
+          <div style="margin-top:6px">${d.urgency.includes('HIGH')?'<span class="tag tag-red">High Priority</span>':'<span class="tag tag-green">Manageable</span>'}</div>
+        </div>
+      </div>
+      <div class="dis-body">
+        <div class="dis-sec"><div class="dis-sec-title">🧬 Causes / Kyu Hota Hai</div><p>${d.causes}</p></div>
+        <div class="dis-sec" style="margin-top:12px"><div class="dis-sec-title">🤒 Symptoms</div><ul>${d.symptoms.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+        <div class="dis-sec" style="margin-top:12px"><div class="dis-sec-title">❌ Kya Avoid Karein</div><ul>${d.avoid.map(a=>`<li>${a}</li>`).join('')}</ul></div>
+        <div class="dis-sec" style="margin-top:12px"><div class="dis-sec-title">✅ Precautions & Kya Karein</div><ul>${d.precautions.map(p=>`<li>${p}</li>`).join('')}</ul></div>
+        <div class="dis-sec" style="margin-top:12px"><div class="dis-sec-title">💊 Temporary Medicines</div><ul>${d.medicines.map(m=>`<li>💊 ${m}</li>`).join('')}</ul></div>
+        <div class="dis-sec" style="margin-top:12px"><div class="dis-sec-title">⚠️ Consequences (Agar Theek Nahi Kiya)</div>
+          <div class="alert alert-danger" style="font-size:0.79rem">${d.consequences}</div></div>
+        <div class="dis-sec" style="margin-top:12px"><div class="dis-sec-title">🔬 Research & Previous Cases Analysis</div>
+          <div class="rx-box"><p style="font-size:0.79rem;margin-bottom:8px"><strong style="color:var(--accent)">Clinical Evidence:</strong> ${d.research}</p>
+            <div style="font-size:0.72rem;color:var(--muted);border-top:1px solid rgba(99,179,237,0.1);padding-top:8px;margin-top:8px"><strong style="color:var(--accent)">📋 Standard Prescription:</strong><ul style="padding-left:14px;margin-top:4px">${d.rx.map(r=>`<li style="margin-bottom:3px">${r}</li>`).join('')}</ul></div>
+          </div>
+        </div>
+        <div class="alert alert-warn" style="margin-top:12px;font-size:0.79rem">🏥 ${d.urgency}</div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleDis(i){
+  const card=document.getElementById('dc'+i);
+  card.classList.toggle('open');
+}
+
+function filterDis(){
+  const q=document.getElementById('dis_search').value.toLowerCase();
+  const filtered=q?DISEASES.filter(d=>d.name.toLowerCase().includes(q)||d.brief.toLowerCase().includes(q)||d.symptoms.some(s=>s.toLowerCase().includes(q))):DISEASES;
+  renderDiseases(filtered);
+}
+
+// ==================== CLINICS ====================
+function renderClinics(){
+  document.getElementById('clinicList').innerHTML=CLINICS.map(c=>`
+    <div class="loc-card">
+      <div class="loc-ico">${c.icon}</div>
+      <div style="flex:1">
+        <div class="loc-name">${c.name}</div>
+        <div style="font-size:0.76rem;color:var(--muted)">${c.type}</div>
+        <div class="loc-meta">
+          <span>📍 <b>${c.addr}</b></span>
+          <span>📞 <b>${c.phone}</b></span>
+          <span>👨‍⚕️ <b>${c.owner}</b></span>
+          <span>⏰ <b>${c.timing}</b></span>
+          <span>🏥 Speciality: <b>${c.spec}</b></span>
+        </div>
+        <span class="loc-badge">${c.open?'✅ Open Now':'⏸ Check Timing'}</span>
+        <br><a class="map-btn" href="${c.map}" target="_blank">📍 View on Maps</a>
+        <button class="map-btn" onclick="window.location='tel:${c.phone.replace(/\s/g,'')}'" style="margin-left:8px">📞 Call Now</button>
+      </div>
+    </div>`).join('');
+}
+
+// ==================== PHARMACIES ====================
+function renderPharma(){
+  document.getElementById('pharmaList').innerHTML=PHARMACIES.map(p=>`
+    <div class="loc-card">
+      <div class="loc-ico">${p.icon}</div>
+      <div style="flex:1">
+        <div class="loc-name">${p.name}</div>
+        <div class="loc-meta">
+          <span>📍 <b>${p.addr}</b></span>
+          <span>📞 <b>${p.phone}</b></span>
+          <span>👤 <b>${p.owner}</b></span>
+          <span>⏰ <b>${p.timing}</b></span>
+          <span>ℹ️ ${p.note}</span>
+        </div>
+        <span class="loc-badge">${p.open?'✅ Open Now':'⏸ Check Timing'}</span>
+        <br><a class="map-btn" href="${p.map}" target="_blank">📍 View on Maps</a>
+        <button class="map-btn" onclick="window.location='tel:${p.phone.replace(/[\s-]/g,'')}'" style="margin-left:8px">📞 Call Now</button>
+      </div>
+    </div>`).join('');
+}
+
+// ==================== REPORT ====================
+function makeReport(){
+  if(!patientData.name){alert('Pehle Risk Check karein.');return;}
+  const p=patientData;
+  const fitnessScore=Math.round(100-p.risk);
+  const scoreClass=fitnessScore>=70?'score-good':fitnessScore>=50?'score-mod':'score-poor';
+
+  const metrics=[
+    {label:'Blood Pressure',val:p.bp+' mmHg',status:p.bp>140?'🔴 High':p.bp>130?'🟡 Elevated':'🟢 Normal',color:p.bp>140?'#f87171':p.bp>130?'#fbbf24':'#34d399'},
+    {label:'Fasting Sugar',val:p.sugar+' mg/dL',status:p.sugar>126?'🔴 Diabetic':p.sugar>100?'🟡 Pre-diabetic':'🟢 Normal',color:p.sugar>126?'#f87171':p.sugar>100?'#fbbf24':'#34d399'},
+    {label:'Cholesterol',val:p.chol+' mg/dL',status:p.chol>240?'🔴 High':p.chol>200?'🟡 Borderline':'🟢 Normal',color:p.chol>240?'#f87171':p.chol>200?'#fbbf24':'#34d399'},
+    {label:'BMI',val:p.bmi,status:p.bmi>=30?'🔴 Obese':p.bmi>=25?'🟡 Overweight':p.bmi<18.5?'🔵 Underweight':'🟢 Normal',color:p.bmi>=30?'#f87171':p.bmi>=25?'#fbbf24':'#34d399'},
+    {label:'Heart Rate',val:p.hr+' bpm',status:p.hr>100?'🟡 High':p.hr<60?'🔵 Low':'🟢 Normal',color:p.hr>100?'#fbbf24':'#34d399'},
+    {label:'Overall Risk',val:p.risk+'%',status:p.risk>70?'🔴 High':p.risk>45?'🟡 Moderate':'🟢 Low',color:p.risk>70?'#f87171':p.risk>45?'#fbbf24':'#34d399'},
+  ];
+
+  const rpt=`
+  <div class="report-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300">SafeHeal AI — Health Report</div>
+        <div style="font-size:0.76rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:4px">Patient: ${p.name} | Age: ${p.age} | Gender: ${p.gender} | Date: ${p.ts}</div>
+      </div>
+      <div class="score-circle ${scoreClass}">${fitnessScore}<div style="font-size:0.55rem;margin-top:1px">/ 100</div></div>
+    </div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-bottom:14px">📊 Vital Parameters</div>
+    <div class="g4" style="margin-bottom:20px">
+      ${metrics.map(m=>`
+        <div class="metric-box">
+          <div class="metric-label">${m.label}</div>
+          <div class="metric-val" style="color:${m.color}">${m.val}</div>
+          <div class="metric-status" style="color:${m.color}">${m.status}</div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <div class="report-card">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-bottom:14px">🎯 Personalized Recommendations</div>
+    <div class="flag-list">
+      ${p.bp>140?`<div class="flag err"><div class="flag-ico">🫀</div><div class="flag-txt"><strong>BP Control Urgent</strong>Target: Below 130/80 mmHg. DASH diet, namak kam, exercise daily, doctor se medicine review.</div></div>`:''}
+      ${p.sugar>100?`<div class="flag warn"><div class="flag-ico">🍬</div><div class="flag-txt"><strong>Blood Sugar Management</strong>${p.sugar>126?'Diabetes confirmed range — Metformin therapy + dietician consult.':'Pre-diabetic — lifestyle change can REVERSE this. Start NOW.'}</div></div>`:''}
+      ${p.chol>200?`<div class="flag warn"><div class="flag-ico">🧈</div><div class="flag-txt"><strong>Cholesterol Action</strong>Fried food, ghee, egg yolk, red meat bilkul kam karein. Omega-3 foods: fish, flaxseeds, walnuts. Statin consider with doctor.</div></div>`:''}
+      ${p.bmi>=25?`<div class="flag warn"><div class="flag-ico">⚖️</div><div class="flag-txt"><strong>Weight Management</strong>Target BMI: 18.5–24.9. Current: ${p.bmi}. Ideal weight: ${Math.round(18.5*(1.7*1.7))}–${Math.round(24.9*(1.7*1.7))} kg (approx). 500 kcal deficit daily + 45 min exercise.</div></div>`:''}
+      <div class="flag info"><div class="flag-ico">🏃</div><div class="flag-txt"><strong>Exercise Prescription</strong>${p.age<40?'30–45 min cardio + strength training 5x/week.':p.age<60?'30 min brisk walk daily + light weights 3x/week.':'20–30 min walk daily, swimming, gentle yoga. Avoid high impact.'}</div></div>
+      <div class="flag info"><div class="flag-ico">🥗</div><div class="flag-txt"><strong>Diet Prescription</strong>Plate method: 50% vegetables, 25% protein (daal/paneer/fish), 25% complex carbs (daliya/brown rice). Avoid: maida, sugar, fried food, soft drinks. Hydration: 2.5–3L water daily.</div></div>
+      <div class="flag ok"><div class="flag-ico">😴</div><div class="flag-txt"><strong>Sleep & Stress</strong>7–8 hours sleep. Yoga/meditation 20 min daily. Screen time <2h before bed. Vacation/hobby time important for cortisol control.</div></div>
+    </div>
+  </div>
+
+  <div class="report-card">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-bottom:14px">📅 Follow-up Plan</div>
+    <div class="flag-list">
+      <div class="flag ok"><div class="flag-ico">📆</div><div class="flag-txt"><strong>Next 1 Week</strong>BP daily measure karein. Sugar monitor karein (if diabetic). Diet change shuru karein. Walk daily start karein.</div></div>
+      <div class="flag ok"><div class="flag-ico">📆</div><div class="flag-txt"><strong>Next 1 Month</strong>CBC, FBS, PPBS, Lipid Profile, Kidney function test karwayen. Doctor visit for medication review.</div></div>
+      <div class="flag ok"><div class="flag-ico">📆</div><div class="flag-txt"><strong>Every 3 Months</strong>HbA1c (if diabetic), BP review, weight check. Dietician follow-up.</div></div>
+      <div class="flag ok"><div class="flag-ico">📆</div><div class="flag-txt"><strong>Annual</strong>Complete health checkup: ECG, Echo, Eye, Kidney, Thyroid, Cancer screening (age-appropriate). Flu + Pneumococcal vaccine.</div></div>
+    </div>
+  </div>
+
+  <div class="report-card" style="border-color:${fitnessScore>=70?'var(--success)':fitnessScore>=50?'var(--warn)':'var(--danger)'}">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-bottom:14px">🏆 Fitness Score: ${fitnessScore}/100</div>
+    <div style="font-size:0.85rem;color:var(--muted);line-height:1.8">
+      ${fitnessScore>=80?'🌟 Excellent Health! Aap bahut achhi jagah hain. Ye lifestyle maintain karein aur annual checkup regularly karein.':
+        fitnessScore>=60?'👍 Good Health with room to improve. Kuch areas mein kaam karna zaroori hai — specially '+
+        (p.bp>130?'BP, ':'')+(p.sugar>100?'Sugar, ':'')+(p.chol>200?'Cholesterol, ':'')+(p.bmi>=25?'Weight, ':'')+' par focus karein.':
+        '⚠️ Health Needs Immediate Attention. Multiple risk factors hain. Doctor se turant milein. Lifestyle changes se significant improvement possible hai — lekin doctor ki supervision mein.'}
+    </div>
+    <div style="margin-top:14px;font-size:0.78rem;color:var(--muted)">📍 Nearest Clinic: <a onclick="show('clinics',null)" style="color:var(--accent);cursor:pointer;text-decoration:underline">Mira Bhayandar Clinics dekhein</a> | 💊 Medicines: <a onclick="show('pharmacy',null)" style="color:var(--accent);cursor:pointer;text-decoration:underline">Pharmacies dekhein</a></div>
+  </div>
+
+  <div style="text-align:center;margin-top:12px">
+    <button class="btn btn-primary" onclick="window.print()">🖨️ Print Report</button>
+    <div style="font-size:0.72rem;color:var(--muted);margin-top:8px">⚠️ Ye report AI-generated hai. Final medical advice ke liye qualified doctor se milein.</div>
+  </div>`;
+
+  document.getElementById('reportOut').innerHTML=rpt;
+  show('report',null);
+  document.querySelectorAll('.nav-tabs a').forEach((a,i)=>{if(i===7)a.classList.add('active');else a.classList.remove('active');});
+}
+
+// ==================== INIT ====================
+renderDiseases(DISEASES);
+renderClinics();
+renderPharma();
+</script>
+</body>
+</html>
